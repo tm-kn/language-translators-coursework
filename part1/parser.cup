@@ -1,0 +1,289 @@
+/**
+ * vim: syntax=java
+ * -*- mode: java;-*-
+ */
+
+/**
+ * Simple language string parser that verifies whether string is part of the language and outputs prettified tree of expressions.
+ *
+ * Includes:
+ * - 3-valued logici values - TRUE(1), FALSE(0) and UNKNOWN(?).
+ * - AND(&) and OR(+) operators.
+ * - Two variable names VAR_K(k) and VAR_N(n).
+ * - NOT(!) operator.
+ *
+ * @author Tomasz Knapik
+ */
+
+
+import java_cup.runtime.*;
+
+
+// Action code
+action code {: 
+    
+    /**
+     * Prints nice-looking parse tree for this language.
+     */
+    class PrettyPrinter {
+        
+        private int indendationLevel = 0;
+        
+        public void increaseIndendation() {
+            indendationLevel++;
+        }
+
+        public void decreaseIndendation() {
+            if (indendationLevel == 0) {
+                return;
+            }
+
+            indendationLevel--;
+        }
+
+        public void printIndendation() { 
+            for (int i = 0; i < indendationLevel; i++) {
+                System.out.print("    ");
+            }
+        }
+
+        void printExpression(Expression expression) {
+            if (expression instanceof LogicValueExpression) {
+                LogicValueExpression exp = (LogicValueExpression) expression;
+
+                System.out.print("LogicValueExpression(");
+                System.out.print(exp.getLogicValue());
+                System.out.print(")");
+            } else if (expression instanceof LogicalOperatorExpression) {
+                LogicalOperatorExpression exp = (LogicalOperatorExpression) expression;
+
+                System.out.print("LogicalOperatorExpression(\n");
+                increaseIndendation();
+
+                printIndendation();
+
+                printExpression(exp.getLeftExpression());
+                System.out.print(",\n");
+
+                printIndendation();
+
+                System.out.print(exp.getOperator());
+                System.out.print(",\n");
+
+                printIndendation();
+
+                printExpression(exp.getRightExpression());
+                System.out.print("\n");
+                decreaseIndendation();
+
+                printIndendation();
+
+                System.out.print(")");
+            } else if (expression instanceof NotExpression) {
+                NotExpression exp = (NotExpression) expression;
+
+                System.out.print("NotExpression(\n");
+
+                increaseIndendation();
+                printIndendation();
+
+                printExpression(exp.getExpression());
+
+                decreaseIndendation();
+
+                System.out.print("\n");
+                printIndendation();
+                System.out.print(")");
+            } else if (expression instanceof VariableExpression) {
+                VariableExpression exp = (VariableExpression) expression;
+
+                System.out.print("Variable(");
+                System.out.print(exp.getVariable());
+                System.out.print(")");
+            }
+            else {
+                throw new Error("Trying to print unknown expression type");
+            }
+        }
+    }
+
+ 
+    /**
+     * Parent type for all the expressions
+     */
+    abstract class Expression {}
+    
+
+    /**
+     * Enumerable specyfing logical operators available in this language
+     */
+    public enum LogicalOperator {AND, OR};
+
+    
+    /**
+     * Expression that contains a logical expression with two sides and operator in between.
+     */
+    class LogicalOperatorExpression extends Expression {
+
+        private Expression leftHandSideExpression;
+        private Expression rightHandSideExpression;
+        private LogicalOperator operator;
+
+        LogicalOperatorExpression(Expression leftHandSideExpression,
+                LogicalOperator operator, Expression rightHandSideExpression) {
+            this.leftHandSideExpression = leftHandSideExpression;
+            this.rightHandSideExpression = rightHandSideExpression;
+            this.operator = operator;
+        }
+
+        public LogicalOperator getOperator() {
+            return operator;
+        }
+
+        public Expression getLeftExpression() {
+            return leftHandSideExpression;
+        }
+
+        public Expression getRightExpression() {
+            return rightHandSideExpression;
+        }
+    }
+
+
+    /**
+     * Enumerable representing logic values available in our language.
+     */
+    public enum LogicValue {FALSE, TRUE, UNKNOWN};
+
+
+    /**
+     * Expression that can be any value from LogicValue.
+     */
+    class LogicValueExpression extends Expression {
+        private LogicValue value;
+
+        public LogicValueExpression(LogicValue value) {
+            this.value = value;
+        }
+
+        protected LogicValue getLogicValue() {
+            return value;
+        }
+    }
+
+
+    /**
+     * Expression that negates any other expression.
+     */
+    class NotExpression extends Expression {
+        private Expression expression;
+
+        public NotExpression(Expression expression) {
+            this.expression = expression;
+        }
+
+        public Expression getExpression() {
+            return expression;
+        }
+
+    }
+
+    /**
+     * Available variables in our language.
+     */
+    enum Variable {K, N}
+
+
+    /**
+     * Expression that can be any value from Variable enum.
+     */
+    class VariableExpression extends Expression {
+        private Variable variable;
+
+        public VariableExpression(Variable variable) {
+            this.variable = variable;
+        }
+
+        public Variable getVariable() {
+            return variable;
+        }
+    }
+    
+
+    // Initialise pretty printer
+    PrettyPrinter pp = new PrettyPrinter();
+:} ;
+
+
+// Parser
+parser code {:
+    public static void main(String args[]) throws java.io.IOException {
+        parser parser_obj = new parser();
+        Symbol parse_tree = null;
+        try {
+            parse_tree = parser_obj.parse();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw new Error(e.toString());
+        };
+
+        // Input extra space after output
+        System.out.println();
+    }
+:};
+
+
+// Scanner
+init with {: scanner.init();              :};
+scan with {: return scanner.next_token(); :};
+
+
+// Terminals (tokens
+terminal NOT;
+terminal AND, OR;
+terminal TRUE, FALSE, UNKNOWN;
+terminal VAR_K, VAR_N;
+
+
+// Non-terminals
+non terminal prog;
+non terminal Expression explist;
+non terminal Expression exp;
+non terminal VariableExpression var;
+
+
+// Starting rule
+start with prog;
+
+
+// Grammar
+prog ::= explist:e {: pp.printExpression(e); :};       
+
+
+// <w> ::= <w> & <p> | <w> + <p> | <p>
+explist ::=
+    explist:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
+    |
+    explist:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
+    |
+    exp:e {: RESULT = e; :};
+
+
+// <p> ::= !<p> | 0 | 1 | ? | <v>
+exp ::=
+    NOT exp:e {: RESULT = new NotExpression(e); :}
+    |
+    FALSE {: RESULT = new LogicValueExpression(LogicValue.FALSE); :}
+    |
+    TRUE {: RESULT = new LogicValueExpression(LogicValue.TRUE); :}
+    |
+    UNKNOWN {: RESULT = new LogicValueExpression(LogicValue.UNKNOWN); :}
+    |
+    var:v {: RESULT = v; :};
+
+
+// <v> ::= k | n
+var ::=
+    VAR_K {: RESULT = new VariableExpression(Variable.K); :}
+    |
+    VAR_N {: RESULT = new VariableExpression(Variable.N); :}; 

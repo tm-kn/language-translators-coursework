@@ -5,7 +5,7 @@ compile:
 	javac parser.java
 
 test:
-	python3 unit_tests/tests.py
+	python3 unit_tests/tests.py -v
 
 clean:
 	rm -f *.class

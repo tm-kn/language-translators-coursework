@@ -61,7 +61,7 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
             ('k = !1;write k', '0'),
             ('k = 1; n = k;write k; write n', ['1', '1']), 
             ('k=0;k=k; write k', '0'),
-            ('k=!!!0; n = k&0&?; write k; write n', ['1', '0'])
+            ('k=!!(!0); n = k&0&?; write k; write n', ['1', '0'])
         ]
 
         for assignment in valid_assignments: 
@@ -93,6 +93,13 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
             result = self.run_programme(stm)
 
             self.assertFinishedWithError(result)
+
+    def test_brackets(self):
+        programme = 'write (1+0)&(0+?)'
+
+        result = self.run_programme(programme)
+
+        self.assertFinishedOKWith(result, '?')
 
 if __name__ == '__main__':
         unittest.main()

@@ -128,6 +128,16 @@ public class scanner {
                         advance();
 
                         return new Symbol(sym.ASSIGN);
+                    
+                    case '(':
+                        advance();
+
+                        return new Symbol(sym.LBRACKET);
+
+                    case ')':
+                        advance();
+
+                        return new Symbol(sym.RBRACKET);
 
                     case ';':
                         advance();

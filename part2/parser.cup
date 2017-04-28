@@ -337,6 +337,7 @@ scan with {: return scanner.next_token(); :};
 
 
 // Terminals (tokens
+terminal LBRACKET, RBRACKET;
 terminal NOT;
 terminal AND, OR;
 terminal TRUE, FALSE, UNKNOWN;
@@ -348,7 +349,6 @@ terminal String ID;
 
 // Non-terminals
 non terminal prog;
-non terminal Expression explist;
 non terminal Expression exp;
 non terminal VariableExpression var;
 non terminal Statement stm;
@@ -358,7 +358,7 @@ non terminal AssignmentStatement assignstm;
 
 // Precedences
 precedence right SEPARATOR;
-
+precedence left AND, OR;
 
 // Starting rule
 start with prog;
@@ -381,23 +381,14 @@ stm ::=
 
 
 // <ws> ::= write <w>
-writestm ::= WRITE explist:exp {: RESULT = new WriteStatement(exp); :};
+writestm ::= WRITE exp:e {: RESULT = new WriteStatement(e); :};
 
 
 // <as> ::= <v> = <w>
-assignstm ::= var:v ASSIGN explist:exp {: RESULT = new AssignmentStatement(v, exp); :};
+assignstm ::= var:v ASSIGN exp:e {: RESULT = new AssignmentStatement(v, e); :};
 
 
-// <w> ::= <w> & <p> | <w> + <p> | <p>
-explist ::=
-    explist:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
-    |
-    explist:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
-    |
-    exp:e {: RESULT = e; :};
-
-
-// <p> ::= !<p> | 0 | 1 | ? | <v>
+// <p> ::= !<p> | 0 | 1 | ? | <v> | <p> & <p> | <p> + <p> | (<p>)
 exp ::=
     NOT exp:e {: RESULT = new NotExpression(e); :}
     |
@@ -407,7 +398,13 @@ exp ::=
     |
     UNKNOWN {: RESULT = new LogicValueExpression(LogicValue.UNKNOWN); :}
     |
-    var:v {: RESULT = v; :};
+    var:v {: RESULT = v; :}
+    |
+    exp:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
+    |
+    exp:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
+    |
+    LBRACKET exp:e RBRACKET {: RESULT = e; :};
 
 
 // <v> ::= k | n

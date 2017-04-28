@@ -203,7 +203,13 @@ action code {:
         }
 
         public String getValue() {
-            return variablesDictionary.get(variable);
+            String value = variablesDictionary.get(variable);
+
+            if (value == null) {
+                throw new Error("You need to assign variable \"" + variable + "\" a value to use it.");
+            }
+
+            return value;
         }
     }
    

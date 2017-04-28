@@ -52,7 +52,27 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
             result = self.run_programme("{} {}".format('write', rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
+   
+    def test_implification_truth_table(self):
+        implification_truth_table = [
+            ('1->1', '1'),
+            ('1->0', '0'),
+            ('1->?', '?'),
 
+            ('0->1', '1'),
+            ('0->0', '1'),
+            ('0->?', '1'),
+
+            ('?->1', '1'),
+            ('?->0', '?'),
+            ('?->?', '?')
+        ]
+
+        for rule in implification_truth_table:
+            result = self.run_programme("{} {}".format('write', rule[0]))
+
+            self.assertFinishedOKWith(result, rule[1])
+    
 
 class TestInterpretation(TestParserMixin, unittest.TestCase):
     def test_valid_assignment_statements(self):
@@ -95,7 +115,7 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
             self.assertFinishedWithError(result)
 
     def test_brackets(self):
-        programme = 'write (1+0)&(0+?)'
+        programme = 'write (1+0)&(0+?)->0'
 
         result = self.run_programme(programme)
 

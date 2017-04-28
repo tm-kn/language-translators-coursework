@@ -54,6 +54,8 @@ public class scanner {
             }
         }
 
+        advance();
+
         return true;
     }
 
@@ -85,7 +87,24 @@ public class scanner {
                         } else {
                             throw new Error("You can only start \"write\" with \"w\"");
                         }
+                    
+                    case '-':
                         
+                        // Make sure the scanner does not repeat itself trying to check "->" forever.
+                        if (nextChars.empty() || (!nextChars.empty() && nextChars.peek() == '>')) {
+                            int[] writeTokens = new int[]{'>'};
+
+                            if (analyseMultiCharacterToken(writeTokens)) {
+                                return new Symbol(sym.IMPLY);
+                            } else {
+                                // Return "-" on top of the stack
+                                goBackBy(1);
+                                break;
+                            }
+                        } else {
+                            throw new Error("You can only start \"->\" with \"-\"");
+                        }
+
                     case 'k':
                     case 'n':
                         String variableName = String.valueOf((char) getNextChar());

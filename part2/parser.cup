@@ -9,9 +9,12 @@
  *
  * Includes:
  * - 3-valued logical values - TRUE(1), FALSE(0) and UNKNOWN(?).
- * - AND(&) and OR(+) operators.
+ * - Brackets (expression)
+ * - AND(&), OR(+) and IMPLY(->) operators.
  * - Variables (k, n).
  * - NOT(!) operator.
+ * - Pritning function (write expr, e.g. write 2&2)
+ * - Assignments (var = expr, e.g. k = 0);
  *
  * @author Tomasz Knapik
  */
@@ -115,7 +118,7 @@ action code {:
     /**
      * Enumerable specyfing logical operators available in this language
      */
-    public enum LogicalOperator {AND, OR};
+    public enum LogicalOperator {AND, OR, IMPLY};
 
     
     /**
@@ -266,7 +269,16 @@ action code {:
                     } else {
                         throw new Error("Unhanlded case of OR operation - " + lhs + "&" + rhs + ".");
                     }
+                
+                case IMPLY:
+                    // Just do NOT(A) OR B
+                    Expression implyExpression = new LogicalOperatorExpression(
+                        new NotExpression(exp.getLeftExpression()),
+                        LogicalOperator.OR,
+                        exp.getRightExpression()
+                    );
 
+                    return interpretateExpression(implyExpression);
                 default:
                     throw new Error("Unknown logical operator.");
             }
@@ -339,7 +351,7 @@ scan with {: return scanner.next_token(); :};
 // Terminals (tokens
 terminal LBRACKET, RBRACKET;
 terminal NOT;
-terminal AND, OR;
+terminal AND, OR, IMPLY;
 terminal TRUE, FALSE, UNKNOWN;
 terminal SEPARATOR;
 terminal ASSIGN;
@@ -358,7 +370,7 @@ non terminal AssignmentStatement assignstm;
 
 // Precedences
 precedence right SEPARATOR;
-precedence left AND, OR;
+precedence left AND, OR, IMPLY;
 
 // Starting rule
 start with prog;
@@ -403,6 +415,8 @@ exp ::=
     exp:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
     |
     exp:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
+    |
+    exp:lhs IMPLY exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.IMPLY, rhs); :}
     |
     LBRACKET exp:e RBRACKET {: RESULT = e; :};
 

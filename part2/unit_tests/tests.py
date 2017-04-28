@@ -19,7 +19,7 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in and_truth_table:
-            result = self.run_programme(rule[0])
+            result = self.run_programme("{} {}".format('write', rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
 
@@ -38,7 +38,7 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in or_truth_table:
-            result = self.run_programme(rule[0])
+            result = self.run_programme("{} {}".format('write', rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
 
@@ -51,7 +51,7 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in not_truth_table:
-            result = self.run_programme(rule[0])
+            result = self.run_programme("{} {}".format('write', rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
 

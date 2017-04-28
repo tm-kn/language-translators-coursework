@@ -53,6 +53,9 @@ class TestParserMixin:
         """Assert programme finished OK with given output."""
         self.assertFinishedOK(result)
 
+        if isinstance(expected_result, str):
+            expected_result = [expected_result]
+
         process, stdout, stderr = result
 
         stdout_list = [str(x, encoding=self.get_encoding()).strip() for x in stdout.splitlines()]

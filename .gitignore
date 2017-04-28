@@ -1,4 +1,4 @@
 *.pyc
 *.class
-part1/parser.java
-part1/sym.java
+parser.java
+sym.java

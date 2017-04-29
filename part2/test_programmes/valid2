@@ -1,1 +1,5 @@
-write 1->0
+write 1 -> 0 & 1 + (!1 + 0) ;
+test_variable = ? & ?;
+write test_variable;
+writee = 1;
+write writee

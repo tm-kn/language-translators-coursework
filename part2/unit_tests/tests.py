@@ -10,9 +10,11 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
             ('1 & 1', '1'),
             ('1 & ?', '?'),
             ('1 & 0', '0'),
+
             ('? & 1', '?'),
             ('? & ?', '?'),
             ('? & 0', '0'),
+
             ('0 & 1', '0'),
             ('0 & ?', '0'),
             ('0 & 0', '0'),
@@ -28,9 +30,11 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
             ('1 + 1', '1'),
             ('1 + ?', '1'),
             ('1 + 0', '1'),
+
             ('? + 1', '1'),
             ('? + ?', '?'),
             ('? + 0', '?'),
+
             ('0 + 1', '1'),
             ('0 + ?', '?'),
             ('0 + 0', '0'),
@@ -120,6 +124,33 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
         result = self.run_programme(programme)
 
         self.assertFinishedOKWith(result, '?')
+
+    def test_valid_variable_names(self):
+        names = [
+            'ultralongvariablenameultralongvariablenameultralongvariablename = 1',
+            'name_with_underscores = 0',
+            'writee = 1',
+            'writt = 0'
+        ]
+
+        for name in names:
+            result = self.run_programme(name);
+
+            self.assertFinishedOK(result)
+
+    
+    def test_invalid_variable_names(self):
+        names = [
+            '_start_with_underscore = 0',
+            'WithUpperCaseCharacters = 1',
+            'withUppercase = ?',
+            'write = 0'
+        ]
+
+        for name in names:
+            result = self.run_programme(name);
+
+            self.assertFinishedWithError(result)
 
 if __name__ == '__main__':
         unittest.main()

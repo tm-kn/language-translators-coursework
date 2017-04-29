@@ -30,12 +30,15 @@ It prints pase trees for input and validates whether string is part of the langu
 ======
 Part 2
 ======
+It is a interpreter that has similar grammar to the one in Part 1, but it also can do variables assignments, implication operator, multiple statements, bracketed expressionsetc.
 
-
-======
-Part 3
-======
-
+.. code::
+     
+    write 1 -> 0 & 1 + (!1 + 0) ;
+    test_variable = ? & ?;
+    write test_variable;
+    writee = 1;
+    write writee
 
 
 *****

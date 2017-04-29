@@ -4,14 +4,14 @@
  */
 
 /**
- * Simple expression language parser that enables using multiple statements
+ * Simple expression 3-values logic language parser that enables using multiple statements
  * and variable assignments.
  *
  * Includes:
  * - 3-valued logical values - TRUE(1), FALSE(0) and UNKNOWN(?).
  * - Brackets (expression)
  * - AND(&), OR(+) and IMPLY(->) operators.
- * - Variables (k, n).
+ * - Variables (has to start with lowercase letter, other characters must be also lowercase and can be underscores).
  * - NOT(!) operator.
  * - Pritning function (write expr, e.g. write 2&2)
  * - Assignments (var = expr, e.g. k = 0);
@@ -243,23 +243,24 @@ action code {:
 
             switch (operator) {
                 case AND:
-                    if (lhs.equals("1") && rhs.equals("1")) {
-                        return "1";
-                    } else if (lhs.equals("0") && rhs.equals("0")) {
-                        return "0";
-                    } else if ((lhs.equals("0") && rhs.equals("?")) || (lhs.equals("?") && rhs.equals("0"))) {
-                        return "0";
-                    } else if ((lhs.equals("0") && rhs.equals("1")) || (lhs.equals("1") && rhs.equals("0"))) {
-                        return "0";
-                    } else if ((lhs.equals("?") && rhs.equals("1")) || (lhs.equals("1") && rhs.equals("?"))) {
-                        return "?";
-                    } else if(lhs.equals("?") && rhs.equals("?")) {
-                        return "?";
-                    } else {
-                        throw new Error("Unhanlded case of AND operation - " + lhs + "&" + rhs + ".");
-                    }
+                    // Derive AND truth table using OR.
+                    // A and B == NOT( NOT(A) OR NOT(B) )
+                    Expression andExpression = new NotExpression(
+                        new LogicalOperatorExpression(
+                            new NotExpression(exp.getLeftExpression()),
+                            LogicalOperator.OR,
+                            new NotExpression(exp.getRightExpression())
+                        )
+                    );
+
+                    return interpretateExpression(andExpression);
+
 
                 case OR:
+                    // OR truth table
+                    // 1 + 1 = 1  1 + ? = 1  1 + 0 = 1
+                    // ? + 1 = 1  ? + ? = ?  ? + 0 = ?
+                    // 0 + 1 = 1  0 + ? = ?  0 + 0 = 0
                     if (lhs.equals("1") || rhs.equals("1")) {
                         return "1";
                     } else if (lhs.equals("0") && rhs.equals("0")) {
@@ -271,7 +272,7 @@ action code {:
                     }
                 
                 case IMPLY:
-                    // Just do NOT(A) OR B
+                    // Just do NOT(A) OR B for implication
                     Expression implyExpression = new LogicalOperatorExpression(
                         new NotExpression(exp.getLeftExpression()),
                         LogicalOperator.OR,
@@ -286,7 +287,9 @@ action code {:
             NotExpression exp = (NotExpression) expression;
             
             String result = interpretateExpression(exp.getExpression());
-
+            
+            // NOT truth table
+            // !1 = 0 !? = ? !0 = 1
             if (result.equals("0")) {
                 return "1";
             } else if (result.equals("1")) {
@@ -336,7 +339,6 @@ parser code {:
         try {
             parse_tree = parser_obj.parse();
         } catch (Throwable e) {
-            e.printStackTrace();
             throw new Error(e.toString());
         };
     }
@@ -378,7 +380,7 @@ start with prog;
 
 // Grammar
 
-prog ::= stm:s {: interpretateStatement(s); :};
+prog ::= stm:s  {: interpretateStatement(s); :};
 
 
 // <e> ::= <ws> | <as> | <ws>; <e> | <as>; <e>

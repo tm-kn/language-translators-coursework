@@ -1,4 +1,8 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import java_cup.runtime.*;
@@ -10,10 +14,11 @@ public class scanner {
     
     protected static Stack<Integer> nextChars = new Stack<Integer>();
 
-    protected static ArrayList<Integer> history = new ArrayList<Integer>();
+    protected static List<Integer> history = new ArrayList<Integer>();
 
     /* advance input by one character */
     protected static void advance()  throws java.io.IOException {
+        
         if (!nextChars.empty()) {
             int nextChar = nextChars.pop();
             history.add(nextChar);
@@ -25,6 +30,10 @@ public class scanner {
         }
     }
 
+    /**
+     * Get items from history and puts them back on the stack (nextChars) to be consumed by number of entries.
+     * Deletes entries from the history.
+     */
     protected static void goBackBy(int steps) {
         for (int i = 0; i < steps; i++) {
             int lastEntry = history.remove(history.size() - 1);
@@ -32,16 +41,24 @@ public class scanner {
             nextChars.push(lastEntry);
         }
     }
-
+    
+    /**
+     * Get the character that is being iterated over.
+     */
     protected static int getNextChar() {
+        // If there're any characters in nextChars stack, use them first.
         if (nextChars.empty()) {
             return next_char;
         }
         
         return nextChars.peek();
     }
-
-    protected static boolean analyseMultiCharacterToken(int[] nextTokens) throws java.io.IOException {
+    
+    /**
+     * Give it a characters array and check whether it matches the programme.
+     */
+    protected static boolean analyseMultiCharacterToken(int[] nextTokens)
+                throws java.io.IOException {
        int i = 0;
 
        for(int token : nextTokens) { 
@@ -62,6 +79,44 @@ public class scanner {
     /* initialize the scanner */
     public static void init() throws java.io.IOException {
         advance();
+    }
+    
+    /**
+     * Get variable name out of the programme input.
+     */
+    public static String parseVariableName(char letter)
+            throws java.io.IOException {
+        int[] allowedStringNameCharactersArray = new int[]{
+            // Lower-case letters
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+            'u', 'v', 'w', 'x', 'y', 'z',
+
+            // Special characters
+            '_'
+        };
+        
+        // Convert array to Set so we can use contains() method
+        Set<Integer> allowedCharactersSet = new HashSet<Integer>();
+
+        for (int allowedCharacter: allowedStringNameCharactersArray)
+            allowedCharactersSet.add(allowedCharacter);
+
+        String stringName = String.valueOf((char) letter);
+        
+        // Move onto next character (currently we're at the first charactter of the variable name
+        advance();
+        
+        // Append every next character form input as long as it is a valid character for a variable name
+        while (allowedCharactersSet.contains(getNextChar())) {
+            stringName += getNextChar();
+            advance();
+        }
+        
+        // Cancels the last advance() that outputed invalid symbol so the main parser can handle it
+        goBackBy(1);
+
+        return stringName;
     }
 
     /* recognize and return the next complete token */
@@ -84,8 +139,11 @@ public class scanner {
                                 goBackBy(1);
                                 break;
                             }
-                        } else {
-                            throw new Error("You can only start \"write\" with \"w\"");
+                        // Variable starting with "w"
+                        } else { 
+                            String variableName = parseVariableName((char) getNextChar());
+                            
+                            return new Symbol(sym.ID, variableName);
                         }
                     
                     case '-':
@@ -105,11 +163,13 @@ public class scanner {
                             throw new Error("You can only start \"->\" with \"-\"");
                         }
 
-                    case 'k':
-                    case 'n':
-                        String variableName = String.valueOf((char) getNextChar());
-
-                        advance();
+                    case 'a': case 'b': case 'c': case 'd':
+                    case 'e': case 'f': case 'g': case 'h':
+                    case 'i': case 'j': case 'k': case 'l':
+                    case 'm': case 'n': case 'o': case 'p':
+                    case 'q': case 'r': case 's': case 't':
+                    case 'u': case 'v': case 'x':
+                        String variableName = parseVariableName((char) getNextChar());
                         
                         return new Symbol(sym.ID, variableName);
 
@@ -183,7 +243,7 @@ public class scanner {
                                 tokens = (char) token + tokens;
                             }
                         } else {
-                            tokens = "w";
+                            tokens += (char) getNextChar();
                         }
 
                         throw new Error("Invalid character(s): \"" + tokens + "\"");

@@ -268,7 +268,7 @@ action code {:
                     } else if (lhs.equals("?") || rhs.equals("?")) {
                         return "?";
                     } else {
-                        throw new Error("Unhanlded case of OR operation - " + lhs + "&" + rhs + ".");
+                        throw new Error("Unhanlded case of OR operation - " + lhs + "+" + rhs + ".");
                     }
                 
                 case IMPLY:

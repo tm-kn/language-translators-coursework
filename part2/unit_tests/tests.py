@@ -21,10 +21,11 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in and_truth_table:
-            result = self.run_programme("{} {}".format('write', rule[0]))
+            result = self.run_programme('{} {}'.format('write',
+                                                       rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
-    
+
     def test_or_truth_table(self):
         or_truth_table = [
             ('1 + 1', '1'),
@@ -41,7 +42,8 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in or_truth_table:
-            result = self.run_programme("{} {}".format('write', rule[0]))
+            result = self.run_programme("{} {}".format('write',
+                                                       rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
 
@@ -53,10 +55,11 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in not_truth_table:
-            result = self.run_programme("{} {}".format('write', rule[0]))
+            result = self.run_programme("{} {}".format('write',
+                                                       rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
-   
+
     def test_implification_truth_table(self):
         implification_truth_table = [
             ('1->1', '1'),
@@ -73,26 +76,27 @@ class TestTruthTable(TestParserMixin, unittest.TestCase):
         ]
 
         for rule in implification_truth_table:
-            result = self.run_programme("{} {}".format('write', rule[0]))
+            result = self.run_programme("{} {}".format('write',
+                                                       rule[0]))
 
             self.assertFinishedOKWith(result, rule[1])
-    
+
 
 class TestInterpretation(TestParserMixin, unittest.TestCase):
     def test_valid_assignment_statements(self):
         valid_assignments = [
             ('k = 0; write k', '0'),
             ('k = !1;write k', '0'),
-            ('k = 1; n = k;write k; write n', ['1', '1']), 
+            ('k = 1; n = k;write k; write n', ['1', '1']),
             ('k=0;k=k; write k', '0'),
             ('k=!!(!0); n = k&0&?; write k; write n', ['1', '0'])
         ]
 
-        for assignment in valid_assignments: 
+        for assignment in valid_assignments:
             result = self.run_programme(assignment[0])
 
             self.assertFinishedOKWith(result, assignment[1])
-    
+
     def test_valid_write_statements(self):
         valid_write_statements = [
             ('write 0&0', '0'),
@@ -105,7 +109,7 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
             result = self.run_programme(write[0])
 
             self.assertFinishedOKWith(result, write[1])
-    
+
     def test_using_null_variable_fails(self):
         invalid_statements = [
             'write k',
@@ -127,18 +131,19 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
 
     def test_valid_variable_names(self):
         names = [
-            'ultralongvariablenameultralongvariablenameultralongvariablename = 1',
+            'ultralongvariablenameultralong' \
+                'variablenameultralongvariablename = 1',
             'name_with_underscores = 0',
             'writee = 1',
             'writt = 0'
         ]
 
         for name in names:
-            result = self.run_programme(name);
+            result = self.run_programme(name)
 
             self.assertFinishedOK(result)
 
-    
+
     def test_invalid_variable_names(self):
         names = [
             '_start_with_underscore = 0',
@@ -148,7 +153,7 @@ class TestInterpretation(TestParserMixin, unittest.TestCase):
         ]
 
         for name in names:
-            result = self.run_programme(name);
+            result = self.run_programme(name)
 
             self.assertFinishedWithError(result)
 

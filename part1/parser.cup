@@ -4,7 +4,8 @@
  */
 
 /**
- * Simple language string parser that verifies whether string is part of the language and outputs prettified tree of expressions.
+ * Simple language string parser that verifies whether string is
+ * part of the language and outputs prettified tree of expressions.
  *
  * Includes:
  * - 3-valued logici values - TRUE(1), FALSE(0) and UNKNOWN(?).
@@ -20,19 +21,28 @@ import java_cup.runtime.*;
 
 
 // Action code
-action code {: 
-    
+action code {:
+
     /**
      * Prints nice-looking parse tree for this language.
      */
     class PrettyPrinter {
-        
+
+        /**
+         * Indendation level the printer is currently at.
+         */
         private int indendationLevel = 0;
-        
+
+        /**
+         * Increase {@link #indendationLevel}.
+         */
         public void increaseIndendation() {
             indendationLevel++;
         }
 
+        /**
+         * Decrease {@link #indendationLevel}. Cannot go below 0.
+         */
         public void decreaseIndendation() {
             if (indendationLevel == 0) {
                 return;
@@ -41,21 +51,35 @@ action code {:
             indendationLevel--;
         }
 
-        public void printIndendation() { 
+        /**
+         * Print indendation string.
+         */
+        public void printIndendation() {
             for (int i = 0; i < indendationLevel; i++) {
                 System.out.print("    ");
             }
         }
 
+        /**
+         * Print expression. Supports nested expressions by
+         * evaluating them recursively.
+         *
+         * @param   expression  Expression of type
+         *                      {@link Expression}.
+         */
         void printExpression(Expression expression) {
             if (expression instanceof LogicValueExpression) {
-                LogicValueExpression exp = (LogicValueExpression) expression;
+                LogicValueExpression exp =
+                    (LogicValueExpression) expression;
 
                 System.out.print("LogicValueExpression(");
                 System.out.print(exp.getLogicValue());
                 System.out.print(")");
-            } else if (expression instanceof LogicalOperatorExpression) {
-                LogicalOperatorExpression exp = (LogicalOperatorExpression) expression;
+            } else if (
+                expression instanceof LogicalOperatorExpression
+            ) {
+                LogicalOperatorExpression exp =
+                    (LogicalOperatorExpression) expression;
 
                 System.out.print("LogicalOperatorExpression(\n");
                 increaseIndendation();
@@ -95,55 +119,101 @@ action code {:
                 printIndendation();
                 System.out.print(")");
             } else if (expression instanceof VariableExpression) {
-                VariableExpression exp = (VariableExpression) expression;
+                VariableExpression exp =
+                    (VariableExpression) expression;
 
                 System.out.print("Variable(");
                 System.out.print(exp.getVariable());
                 System.out.print(")");
             }
             else {
-                throw new Error("Trying to print unknown expression type");
+                String msg = "Trying to print unknown"
+                             + "expression type";
+
+                throw new Error(msg);
             }
         }
     }
 
- 
-    /**
-     * Parent type for all the expressions
-     */
-    abstract class Expression {}
-    
 
     /**
-     * Enumerable specyfing logical operators available in this language
+     * Parent type for all the expressions.
+     */
+    abstract class Expression {}
+
+
+    /**
+     * Enumerable specyfing logical operators
+     * available in this language
      */
     public enum LogicalOperator {AND, OR};
 
-    
+
     /**
-     * Expression that contains a logical expression with two sides and operator in between.
+     * Expression that contains a logical expression
+     * with two sides and operator in between.
      */
     class LogicalOperatorExpression extends Expression {
 
+        /**
+         * {@link Expression} on the left-hand side.
+         */
         private Expression leftHandSideExpression;
+
+        /**
+         * {@link Expression} on the right-hand side.
+         */
         private Expression rightHandSideExpression;
+
+        /**
+         * {@link LogicalOperator} of the expression.
+         */
         private LogicalOperator operator;
 
-        LogicalOperatorExpression(Expression leftHandSideExpression,
-                LogicalOperator operator, Expression rightHandSideExpression) {
-            this.leftHandSideExpression = leftHandSideExpression;
-            this.rightHandSideExpression = rightHandSideExpression;
+        /**
+         * Construct a new {@link LogicalOperatorExpression}.
+         *
+         * @param   lhsExpression  expression on
+         *                         the left-hand side
+         *                         of the expression.
+         * @param   operator       {@link LogicalOperator}
+         * @param   rhsExpression  expression on
+         *                         the right-hand side
+         *                         of the expression.
+         */
+        LogicalOperatorExpression(
+            Expression lhsExpression,
+            LogicalOperator operator,
+            Expression rhsExpression
+        ) {
+            this.leftHandSideExpression = lhsExpression;
+            this.rightHandSideExpression = rhsExpression;
             this.operator = operator;
         }
 
+        /**
+         * Get expression's operator.
+         *
+         * @return  expression's operator.
+         */
         public LogicalOperator getOperator() {
             return operator;
         }
 
+        /**
+         * Get expression on the left-hand side.
+         *
+         * @return left-hand side expression.
+         */
         public Expression getLeftExpression() {
             return leftHandSideExpression;
         }
 
+        /**
+         * Get expression on the right-hand side.
+         *
+         * @return right-hand side expression.
+         */
         public Expression getRightExpression() {
             return rightHandSideExpression;
         }
@@ -151,21 +221,35 @@ action code {:
 
 
     /**
-     * Enumerable representing logic values available in our language.
+     * Enumerable representing logic values
+     * available in the language.
      */
     public enum LogicValue {FALSE, TRUE, UNKNOWN};
 
 
     /**
-     * Expression that can be any value from LogicValue.
+     * Expression that can be any value from {@link LogicValue}.
      */
     class LogicValueExpression extends Expression {
+        /**
+         * Expression's value.
+         */
         private LogicValue value;
 
+        /**
+         * Construct a new {@link LogicValueExpression}.
+         *
+         * @param   value   value from {@link LogicValue}.
+         */
         public LogicValueExpression(LogicValue value) {
             this.value = value;
         }
 
+        /**
+         * Get expression's value.
+         *
+         * @return  expression's value.
+         */
         protected LogicValue getLogicValue() {
             return value;
         }
@@ -176,12 +260,25 @@ action code {:
      * Expression that negates any other expression.
      */
     class NotExpression extends Expression {
+        /**
+         * Expression.
+         */
         private Expression expression;
 
+        /**
+         * Construct a new @{link NotExpression}.
+         *
+         * @param   expression  expression to be negated.
+         */
         public NotExpression(Expression expression) {
             this.expression = expression;
         }
 
+        /**
+         * Get expression.
+         *
+         * @return  expression.
+         */
         public Expression getExpression() {
             return expression;
         }
@@ -189,37 +286,56 @@ action code {:
     }
 
     /**
-     * Available variables in our language.
+     * Variables available in our language.
      */
     enum Variable {K, N}
 
 
     /**
-     * Expression that can be any value from Variable enum.
+     * Expression that can be any value from {@link Variable}.
      */
     class VariableExpression extends Expression {
+        /**
+         * Variable stored in this expression.
+         */
         private Variable variable;
 
+        /**
+         * Construct {@link VariableExpression}.
+         * @param   variable    Variable that this
+         *                      expression is made of.
+         */
         public VariableExpression(Variable variable) {
             this.variable = variable;
         }
 
+        /**
+         * Get variable stored in this expression.
+         */
         public Variable getVariable() {
             return variable;
         }
     }
-    
+
 
     // Initialise pretty printer
     PrettyPrinter pp = new PrettyPrinter();
-:} ;
+
+:};
 
 
 // Parser
 parser code {:
-    public static void main(String args[]) throws java.io.IOException {
+
+    /**
+     * Entry point of the parser.
+     * @throws  java.io.IOException
+     */
+    public static void main(String args[])
+            throws java.io.IOException {
         parser parser_obj = new parser();
         Symbol parse_tree = null;
+
         try {
             parse_tree = parser_obj.parse();
         } catch (Throwable e) {
@@ -230,15 +346,16 @@ parser code {:
         // Input extra space after output
         System.out.println();
     }
+
 :};
 
 
 // Scanner
-init with {: scanner.init();              :};
+init with {: scanner.init(); :};
 scan with {: return scanner.next_token(); :};
 
 
-// Terminals (tokens
+// Terminals (tokens)
 terminal NOT;
 terminal AND, OR;
 terminal TRUE, FALSE, UNKNOWN;
@@ -257,14 +374,20 @@ start with prog;
 
 
 // Grammar
-prog ::= explist:e {: pp.printExpression(e); :};       
+prog ::= explist:e {: pp.printExpression(e); :};
 
 
 // <w> ::= <w> & <p> | <w> + <p> | <p>
 explist ::=
-    explist:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
+    explist:lhs AND exp:rhs {:
+        RESULT = new LogicalOperatorExpression(
+            lhs, LogicalOperator.AND,rhs);
+    :}
     |
-    explist:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
+    explist:lhs OR exp:rhs {:
+        RESULT = new LogicalOperatorExpression(
+            lhs, LogicalOperator.OR, rhs);
+    :}
     |
     exp:e {: RESULT = e; :};
 
@@ -277,7 +400,9 @@ exp ::=
     |
     TRUE {: RESULT = new LogicValueExpression(LogicValue.TRUE); :}
     |
-    UNKNOWN {: RESULT = new LogicValueExpression(LogicValue.UNKNOWN); :}
+    UNKNOWN {:
+        RESULT = new LogicValueExpression(LogicValue.UNKNOWN);
+    :}
     |
     var:v {: RESULT = v; :};
 
@@ -286,4 +411,4 @@ exp ::=
 var ::=
     VAR_K {: RESULT = new VariableExpression(Variable.K); :}
     |
-    VAR_N {: RESULT = new VariableExpression(Variable.N); :}; 
+    VAR_N {: RESULT = new VariableExpression(Variable.N); :};

@@ -21,25 +21,30 @@ public class scanner {
     /**
      * Stack of characters to be consumed next by {@link #advance}.
      */
-    protected static Stack<Integer> nextChars = new Stack<Integer>();
+    protected static Stack<Integer> nextChars =
+        new Stack<Integer>();
 
     /**
      * History of all the characters that has been consumed by
      * {@link #advance}.
      */
-    protected static List<Integer> history = new ArrayList<Integer>();
+    protected static List<Integer> history =
+        new ArrayList<Integer>();
 
     /**
      * Avance input by one character.
      *
      * <p>
      * It first reads characters from {@link #nextChars} and
-     * if there is none left in there it reads it in from {@link System#in}.
+     * if there is none left in there it reads it in
+     * from {@link System#in}.
      * </p>
      *
      * <p>
      * Each character is added to {@link #history}.
      * </p>
+     *
+     * @throws  java.io.IOException
      */
     protected static void advance() throws java.io.IOException {
         if (!nextChars.empty()) {
@@ -91,9 +96,11 @@ public class scanner {
      *
      * @param   nextTokens  Next characters to be matched.
      * @return  True if tokens match, otherwise false.
+     * @throws  java.io.IOException
      */
-    protected static boolean analyseMultiCharacterToken(int[] nextTokens)
-                throws java.io.IOException {
+    protected static boolean analyseMultiCharacterToken(
+        int[] nextTokens
+    ) throws java.io.IOException {
        int i = 0;
 
        for(int token : nextTokens) {
@@ -113,6 +120,7 @@ public class scanner {
 
     /**
      * Initialise the scanner.
+     * @throws  java.io.IOException
      */
     public static void init() throws java.io.IOException {
         advance();
@@ -123,6 +131,7 @@ public class scanner {
      *
      * @param   letter  First letter of the string.
      * @return  Valid variable name
+     * @throws  java.io.IOException
      */
     public static String parseVariableName(char letter)
             throws java.io.IOException {
@@ -164,6 +173,7 @@ public class scanner {
 
     /**
      * Recognize and return the next complete token.
+     * @throws  java.io.IOException
      */
     public static Symbol next_token() throws java.io.IOException {
         while (true) {
@@ -172,11 +182,19 @@ public class scanner {
 
                     // Make sure the scanner does not repeat itself
                     // trying to check "wr" forever.
-                    if (nextChars.empty() || (!nextChars.empty()
-                                              && nextChars.peek() == 'r')) {
-                        int[] writeTokens = new int[]{'r', 'i', 't', 'e', ' '};
+                    if (
+                        nextChars.empty()
+                        || (
+                            !nextChars.empty()
+                            && nextChars.peek() == 'r'
+                        )
+                    ) {
+                        int[] writeTokens = new int[]{
+                            'r', 'i', 't', 'e', ' '};
 
-                        if (analyseMultiCharacterToken(writeTokens)) {
+                        if (
+                            analyseMultiCharacterToken(writeTokens)
+                        ) {
                             return new Symbol(sym.WRITE);
                         } else {
                             // Return "w" on top of the stack
@@ -195,11 +213,18 @@ public class scanner {
 
                     // Make sure the scanner does not repeat itself
                     // trying to check "->" forever.
-                    if (nextChars.empty() || (!nextChars.empty()
-                                              && nextChars.peek() == '>')) {
-                        int[] writeTokens = new int[]{'>'};
+                    if (
+                        nextChars.empty()
+                        || (
+                            !nextChars.empty()
+                            && nextChars.peek() == '>'
+                        )
+                    ) {
+                        int[] implyTokens = new int[]{'>'};
 
-                        if (analyseMultiCharacterToken(writeTokens)) {
+                        if (
+                            analyseMultiCharacterToken(implyTokens)
+                        ) {
                             return new Symbol(sym.IMPLY);
                         } else {
                             // Return "-" on top of the stack
@@ -207,7 +232,10 @@ public class scanner {
                             break;
                         }
                     } else {
-                        throw new Error("You can only start \"->\" with \"-\"");
+                        String msg = "You can only start "
+                                     + "\"->\" with \"-\"";
+
+                        throw new Error(msg);
                     }
 
                 case 'a': case 'b': case 'c': case 'd':
@@ -294,7 +322,11 @@ public class scanner {
                         tokens += (char) getNextChar();
                     }
 
-                    throw new Error("Invalid character(s): \"" + tokens + "\"");
+                    String msg = "Invalid character(s): \""
+                                 + tokens
+                                 + "\"";
+
+                    throw new Error(msg);
             }
         }
     }

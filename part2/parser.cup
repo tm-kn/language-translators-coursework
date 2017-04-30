@@ -4,14 +4,17 @@
  */
 
 /**
- * Simple expression 3-values logic language parser that enables using multiple statements
+ * Simple expression 3-values logic language parser
+ * that enables use of multiple statements
  * and variable assignments.
  *
  * Includes:
  * - 3-valued logical values - TRUE(1), FALSE(0) and UNKNOWN(?).
  * - Brackets (expression)
  * - AND(&), OR(+) and IMPLY(->) operators.
- * - Variables (has to start with lowercase letter, other characters must be also lowercase and can be underscores).
+ * - Variables (has to start with lowercase letter,
+ *              other characters must be also lowercase
+ *              and can be underscores).
  * - NOT(!) operator.
  * - Pritning function (write expr, e.g. write 2&2)
  * - Assignments (var = expr, e.g. k = 0);
@@ -26,12 +29,13 @@ import java_cup.runtime.*;
 
 
 // Action code
-action code {: 
+action code {:
 
     /**
      * Variables store
      */
-    Map<String, String> variablesDictionary = new HashMap<String, String>();
+    Map<String, String> variablesDictionary =
+        new HashMap<String, String>();
 
 
     /**
@@ -41,16 +45,30 @@ action code {:
 
 
     /**
-     * Statement that prints expressions out.
+     * Statement that stores expressions that is
+     * meant to be printed out.
      */
     class WriteStatement extends Statement {
-       
+
+        /**
+         * Associated expression.
+         */
         private Expression expression;
 
+        /**
+         * Construct {@link writeStatement}
+         *
+         * @param   expression  Expression.
+         */
         public WriteStatement(Expression expression) {
             this.expression = expression;
         }
 
+        /**
+         * Get associated expression.
+         *
+         * @return  Associated expression.
+         */
         public Expression getExpression() {
             return expression;
         }
@@ -58,29 +76,52 @@ action code {:
 
 
     /**
-     * Statement that assigns an expression to a variable.
+     * Statement that stores information about statement
+     * that is meant to assign an expression
+     * to a variable.
      */
     class AssignmentStatement extends Statement {
-        
+
         /**
-         * LHS
+         * Variable name that an expression is meant to
+         * be assigned to.
          */
         private VariableExpression variable;
 
         /**
-         * RHS
+         * Expression that is meant to be assigned
+         * to a variable.
          */
         private Expression expression;
 
-        public AssignmentStatement(VariableExpression variable, Expression expression) {
+        /**
+         * Construct a new {@link AssignmentStatement}.
+         * @param   variable    Variable that is meant
+         *                      to be assigned a value.
+         * @param   expression  Expression that is meant
+         *                      to be assigned
+         *                      to a variable.
+         */
+        public AssignmentStatement(
+            VariableExpression variable,
+            Expression expression
+        ) {
             this.variable = variable;
             this.expression = expression;
         }
-        
+
+        /**
+         * Get expression.
+         * @return  expression.
+         */
         public Expression getExpression() {
             return expression;
         }
 
+        /**
+         * Get variable.
+         * @return  variable.
+         */
         public VariableExpression getVariable() {
             return variable;
         }
@@ -88,21 +129,48 @@ action code {:
 
 
     /**
-     * Statement that bounds two statements together
+     * Statement that is meant to bound two
+     * statements together.
      */
     class CompoundStatement extends Statement {
+
+        /**
+         * Left-hand side statement.
+         */
         private Statement leftHandSideStatement;
+
+        /**
+         * Right-hand side statement.
+         */
         private Statement rightHandSideStatement;
 
-        public CompoundStatement(Statement LHSStatement, Statement RHSStatement) {
-            leftHandSideStatement = LHSStatement;
-            rightHandSideStatement = RHSStatement;
+        /**
+         * Construct a new {@link CompoundStatement}.
+         *
+         * @param   lhsStatement    left-hand side statement.
+         * @param   rhsStatement    right-hand side statement.
+         */
+        public CompoundStatement(
+            Statement lhsStatement, Statement rhsStatement
+        ) {
+            leftHandSideStatement = lhsStatement;
+            rightHandSideStatement = rhsStatement;
         }
 
+        /**
+         * Get left-hand side statement.
+         *
+         * @return  left-hand side statement.
+         */
         public Statement getLeftStatement() {
             return leftHandSideStatement;
         }
 
+        /**
+         * Get right-hand side statement.
+         *
+         * @return right-hand side statement.
+         */
         public Statement getRightStatement() {
             return rightHandSideStatement;
         }
@@ -110,41 +178,83 @@ action code {:
 
 
     /**
-     * Parent type for all the expressions
+     * Parent type for all the expressions in this parser.
      */
     abstract class Expression {}
-    
+
 
     /**
-     * Enumerable specyfing logical operators available in this language
+     * Enumerable specyfing logical operators
+     * available in this parser.
      */
     public enum LogicalOperator {AND, OR, IMPLY};
 
-    
+
     /**
-     * Expression that contains a logical expression with two sides and operator in between.
+     * Expression that contains a logical expression
+     * with two sides and operator in between.
      */
     class LogicalOperatorExpression extends Expression {
 
+        /**
+         * {@link Expression} on the left-hand side.
+         */
         private Expression leftHandSideExpression;
+
+        /**
+         * {@link Expression} on the right-hand side.
+         */
         private Expression rightHandSideExpression;
+
+        /**
+         * {@link LogicalOperator} of the expression.
+         */
         private LogicalOperator operator;
 
-        LogicalOperatorExpression(Expression leftHandSideExpression,
-                LogicalOperator operator, Expression rightHandSideExpression) {
-            this.leftHandSideExpression = leftHandSideExpression;
-            this.rightHandSideExpression = rightHandSideExpression;
+        /**
+         * Construct a new {@link LogicalOperatorExpression}.
+         *
+         * @param   lhsExpression  expression on
+         *                         the left-hand side
+         *                         of the expression.
+         * @param   operator       {@link LogicalOperator}
+         * @param   rhsExpression  expression on
+         *                         the right-hand side
+         *                         of the expression.
+         */
+        LogicalOperatorExpression(
+            Expression lhsExpression,
+            LogicalOperator operator,
+            Expression rhsExpression
+        ) {
+            this.leftHandSideExpression = lhsExpression;
+            this.rightHandSideExpression = rhsExpression;
             this.operator = operator;
         }
 
+        /**
+         * Get expression's operator.
+         *
+         * @return  expression's operator.
+         */
         public LogicalOperator getOperator() {
             return operator;
         }
 
+        /**
+         * Get expression on the left-hand side.
+         *
+         * @return left-hand side expression.
+         */
         public Expression getLeftExpression() {
             return leftHandSideExpression;
         }
 
+        /**
+         * Get expression on the right-hand side.
+         *
+         * @return right-hand side expression.
+         */
         public Expression getRightExpression() {
             return rightHandSideExpression;
         }
@@ -152,21 +262,35 @@ action code {:
 
 
     /**
-     * Enumerable representing logic values available in our language.
+     * Enumerable representing logic values available
+     * in the language.
      */
     public enum LogicValue {FALSE, TRUE, UNKNOWN};
 
 
     /**
-     * Expression that can be any value from LogicValue.
+     * Expression that can be any value from {@link LogicValue}.
      */
     class LogicValueExpression extends Expression {
+        /**
+         * Expression's value.
+         */
         private LogicValue value;
 
+        /**
+         * Construct a new {@link LogicValueExpression}.
+         *
+         * @param   value   value from {@link LogicValue}.
+         */
         public LogicValueExpression(LogicValue value) {
             this.value = value;
         }
 
+        /**
+         * Get expression's value.
+         *
+         * @return  expression's value.
+         */
         protected LogicValue getLogicValue() {
             return value;
         }
@@ -177,79 +301,131 @@ action code {:
      * Expression that negates any other expression.
      */
     class NotExpression extends Expression {
+        /**
+         * Expression.
+         */
         private Expression expression;
 
+        /**
+         * Construct a new @{link NotExpression}.
+         *
+         * @param   expression  expression to be negated.
+         */
         public NotExpression(Expression expression) {
             this.expression = expression;
         }
 
+        /**
+         * Get expression.
+         *
+         * @return  expression.
+         */
         public Expression getExpression() {
             return expression;
         }
 
     }
-   
-   
+
+
    /**
-     * Expression that can be any value from Variable enum.
+     * Expression that links variable name symbol and its value.
      */
     class VariableExpression extends Expression {
-        
+        /**
+         * Variable name.
+         */
         private String variable;
 
+        /**
+         * Construct {@link VariableExpression}.
+         * @param   variable    Variable name.
+         */
         public VariableExpression(String variable) {
             this.variable = variable;
         }
 
+        /**
+         * Get variable name.
+         *
+         * @return  variable's name.
+         */
         public String getVariable() {
             return variable;
         }
 
+        /**
+         * Get value of this variable from the variable store.
+         *
+         * @return  variable's value.
+         */
         public String getValue() {
             String value = variablesDictionary.get(variable);
 
             if (value == null) {
-                throw new Error("You need to assign variable \"" + variable + "\" a value to use it.");
+                String msg = "You need to assign variable \""
+                             + variable
+                             + "\" a value to use it.";
+
+                throw new Error(msg);
             }
 
             return value;
         }
     }
-   
-    
+
+    /**
+     * Evalue expression. Supports evaluation of
+     * nested expressions.
+     *
+     * @param   expression  Expression to be evaluated.
+     */
     String interpretateExpression(Expression expression) {
         if (expression instanceof LogicValueExpression) {
-            LogicValueExpression exp = (LogicValueExpression) expression;
+            LogicValueExpression exp =
+                (LogicValueExpression) expression;
 
             switch(exp.getLogicValue()) {
                 case TRUE:
                     return "1";
-                    
+
                 case FALSE:
                     return "0";
-                    
+
                 case UNKNOWN:
                     return "?";
 
                 default:
-                    throw new Error(exp.getLogicValue() + " is not a valid logic value expression.");
+                    String msg = exp.getLogicValue()
+                                 + " is not a valid logic "
+                                 + "value expression.";
+                    throw new Error(msg);
             }
-        } else if (expression instanceof LogicalOperatorExpression) {
-            LogicalOperatorExpression exp = (LogicalOperatorExpression) expression;
-            String lhs = interpretateExpression(exp.getLeftExpression());
-            String rhs = interpretateExpression(exp.getRightExpression());
-            
+        } else if (
+            expression instanceof LogicalOperatorExpression
+        ) {
+            LogicalOperatorExpression exp =
+                (LogicalOperatorExpression) expression;
+            String lhs = interpretateExpression(
+                exp.getLeftExpression());
+            String rhs = interpretateExpression(
+                exp.getRightExpression());
+
             LogicalOperator operator = exp.getOperator();
 
             switch (operator) {
                 case AND:
-                    // Derive AND truth table using OR.
+                    // Using De Morgan's law transform build AND
+                    // operator using OR operator.
                     // A and B == NOT( NOT(A) OR NOT(B) )
                     Expression andExpression = new NotExpression(
                         new LogicalOperatorExpression(
-                            new NotExpression(exp.getLeftExpression()),
+                            new NotExpression(
+                                exp.getLeftExpression()
+                            ),
                             LogicalOperator.OR,
-                            new NotExpression(exp.getRightExpression())
+                            new NotExpression(
+                                exp.getRightExpression()
+                            )
                         )
                     );
 
@@ -261,6 +437,10 @@ action code {:
                     // 1 + 1 = 1  1 + ? = 1  1 + 0 = 1
                     // ? + 1 = 1  ? + ? = ?  ? + 0 = ?
                     // 0 + 1 = 1  0 + ? = ?  0 + 0 = 0
+                    // OR operator is used as the base logical
+                    // operator for all other expressions
+                    // in this parser, e. g. see the AND
+                    // operator's implementation above.
                     if (lhs.equals("1") || rhs.equals("1")) {
                         return "1";
                     } else if (lhs.equals("0") && rhs.equals("0")) {
@@ -268,16 +448,28 @@ action code {:
                     } else if (lhs.equals("?") || rhs.equals("?")) {
                         return "?";
                     } else {
-                        throw new Error("Unhanlded case of OR operation - " + lhs + "+" + rhs + ".");
+                        String msg = "Unhanlded case of OR "
+                                     + "operation - "
+                                     + lhs
+                                     + "+"
+                                     + rhs
+                                     + ".";
+
+                        throw new Error(msg);
                     }
-                
+
                 case IMPLY:
-                    // Just do NOT(A) OR B for implication
-                    Expression implyExpression = new LogicalOperatorExpression(
-                        new NotExpression(exp.getLeftExpression()),
-                        LogicalOperator.OR,
-                        exp.getRightExpression()
-                    );
+                    // Use formula to transform NOT and OR into
+                    // implication.
+                    // NOT(A) OR B
+                    Expression implyExpression =
+                        new LogicalOperatorExpression(
+                            new NotExpression(
+                                exp.getLeftExpression()
+                            ),
+                            LogicalOperator.OR,
+                            exp.getRightExpression()
+                        );
 
                     return interpretateExpression(implyExpression);
                 default:
@@ -285,9 +477,10 @@ action code {:
             }
         } else if (expression instanceof NotExpression) {
             NotExpression exp = (NotExpression) expression;
-            
-            String result = interpretateExpression(exp.getExpression());
-            
+
+            String result = interpretateExpression(
+                exp.getExpression());
+
             // NOT truth table
             // !1 = 0 !? = ? !0 = 1
             if (result.equals("0")) {
@@ -300,12 +493,14 @@ action code {:
                 throw new Error(result + " is not a valid value");
             }
         } else if (expression instanceof VariableExpression) {
-            VariableExpression exp = (VariableExpression) expression;
-            
+            VariableExpression exp =
+                (VariableExpression) expression;
+
             return exp.getValue();
         }
         else {
-            throw new Error("Trying to print unknown expression type");
+            String msg = "Trying to print unknown expression type";
+            throw new Error(msg);
         }
     }
 
@@ -313,44 +508,63 @@ action code {:
         if (statement instanceof CompoundStatement) {
             CompoundStatement stm = (CompoundStatement) statement;
 
+
+            // Interpretate left-hand side expression first
+            // since it comes first in the code.
             interpretateStatement(stm.getLeftStatement());
             interpretateStatement(stm.getRightStatement());
         } else if (statement instanceof WriteStatement) {
             WriteStatement stm = (WriteStatement) statement;
 
-            System.out.println(interpretateExpression(stm.getExpression()));
+            System.out.println(
+                interpretateExpression(stm.getExpression()));
 
         } else if (statement instanceof AssignmentStatement) {
-            AssignmentStatement stm = (AssignmentStatement) statement;
-            
-            String value = interpretateExpression(stm.getExpression());
+            AssignmentStatement stm =
+                (AssignmentStatement) statement;
 
-            variablesDictionary.put(stm.getVariable().getVariable(), value);
+            String value = interpretateExpression(
+                stm.getExpression());
+
+            variablesDictionary.put(
+                stm.getVariable().getVariable(),
+                value
+            );
         }
     }
-:} ;
+
+:};
 
 
 // Parser
 parser code {:
-    public static void main(String args[]) throws java.io.IOException {
+
+    /**
+     * Main entry point for the parser.
+     *
+     * @throws java.io.IOException
+     */
+    public static void main(String args[])
+            throws java.io.IOException {
         parser parser_obj = new parser();
         Symbol parse_tree = null;
+
         try {
             parse_tree = parser_obj.parse();
         } catch (Throwable e) {
             throw new Error(e.toString());
         };
     }
+
 :};
 
 
 // Scanner
-init with {: scanner.init();              :};
+init with {: scanner.init(); :};
 scan with {: return scanner.next_token(); :};
 
 
-// Terminals (tokens
+// Terminals (tokens)
 terminal LBRACKET, RBRACKET;
 terminal NOT;
 terminal AND, OR, IMPLY;
@@ -389,9 +603,13 @@ stm ::=
     |
     assignstm:s {: RESULT = s; :}
     |
-    writestm:lhs SEPARATOR stm:rhs {: RESULT = new CompoundStatement(lhs, rhs); :}
+    writestm:lhs SEPARATOR stm:rhs {:
+        RESULT = new CompoundStatement(lhs, rhs);
+    :}
     |
-    assignstm:lhs SEPARATOR stm:rhs {: RESULT = new CompoundStatement(lhs, rhs); :};
+    assignstm:lhs SEPARATOR stm:rhs {:
+        RESULT = new CompoundStatement(lhs, rhs);
+    :};
 
 
 // <ws> ::= write <w>
@@ -399,26 +617,43 @@ writestm ::= WRITE exp:e {: RESULT = new WriteStatement(e); :};
 
 
 // <as> ::= <v> = <w>
-assignstm ::= var:v ASSIGN exp:e {: RESULT = new AssignmentStatement(v, e); :};
+assignstm ::= var:v ASSIGN exp:e {:
+        RESULT = new AssignmentStatement(v, e);
+    :};
 
 
 // <p> ::= !<p> | 0 | 1 | ? | <v> | <p> & <p> | <p> + <p> | (<p>)
 exp ::=
     NOT exp:e {: RESULT = new NotExpression(e); :}
     |
-    FALSE {: RESULT = new LogicValueExpression(LogicValue.FALSE); :}
+    FALSE {:
+        RESULT = new LogicValueExpression(LogicValue.FALSE);
+    :}
     |
-    TRUE {: RESULT = new LogicValueExpression(LogicValue.TRUE); :}
+    TRUE {:
+        RESULT = new LogicValueExpression(LogicValue.TRUE);
+    :}
     |
-    UNKNOWN {: RESULT = new LogicValueExpression(LogicValue.UNKNOWN); :}
+    UNKNOWN {:
+        RESULT = new LogicValueExpression(LogicValue.UNKNOWN);
+    :}
     |
     var:v {: RESULT = v; :}
     |
-    exp:lhs AND exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.AND, rhs); :}
+    exp:lhs AND exp:rhs {:
+        RESULT = new LogicalOperatorExpression(
+            lhs, LogicalOperator.AND, rhs);
+    :}
     |
-    exp:lhs OR exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.OR, rhs); :}
+    exp:lhs OR exp:rhs {:
+        RESULT = new LogicalOperatorExpression(
+            lhs, LogicalOperator.OR, rhs);
+        :}
     |
-    exp:lhs IMPLY exp:rhs {: RESULT = new LogicalOperatorExpression(lhs, LogicalOperator.IMPLY, rhs); :}
+    exp:lhs IMPLY exp:rhs {:
+        RESULT = new LogicalOperatorExpression(
+            lhs, LogicalOperator.IMPLY, rhs);
+    :}
     |
     LBRACKET exp:e RBRACKET {: RESULT = e; :};
 

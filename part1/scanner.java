@@ -19,17 +19,19 @@ public class scanner {
      * Reads character from {@link System#in} and adds it to
      * {@link next_char}.
      * </p>
+     *
+     * @throws  java.io.IOException;
      */
-    protected static void advance()
-        throws java.io.IOException
-        { next_char = System.in.read(); }
+    protected static void advance() throws java.io.IOException {
+        next_char = System.in.read();
+    }
 
     /**
      * Initialise scanner.
      */
-    public static void init()
-        throws java.io.IOException
-        { advance(); }
+    public static void init() throws java.io.IOException {
+        advance();
+    }
 
     /**
      * Recognize and return the next complete token
